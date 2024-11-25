@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  techchallenge:
+    container_name: lanchonete
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    depends_on:
+      - databasesqlserver
+    environment:
+      SQLServerConnection: "Data Source=databasesqlserver;Initial Catalog=ByteMeBurguer;TrustServerCertificate=True;Persist Security Info=True;User ID=SA;Password=TechChallenge#api"
+    ports:
+      - "5001:8080"
+    networks: 
+      - techchallengenet
+    restart: always
+      
+  databasesqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: databasesqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=TechChallenge#api
+    ports:
+      - 1450:1433
+    networks: 
+      - techchallengenet
+
+networks:
+  techchallengenet:
+    driver: bridge

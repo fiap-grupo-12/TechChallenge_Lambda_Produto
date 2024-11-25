@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-techchallenge
+  labels:
+    app: deployment-techchallenge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pod-techchallenge
+  template:
+    metadata:
+      name: pod-techchallenge
+      labels:
+        app: pod-techchallenge
+    spec:
+      containers:
+        - name: pod-techchallenge
+          image: henriquesantos9094/techchallenge:2.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SQLServerConnection
+              valueFrom:
+                secretKeyRef:
+                  key: SQLServerConnection
+                  name: opaque-techchallenge
+          livenessProbe:
+            httpGet:
+              path: /swagger/index.html
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /swagger/index.html
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 10m
+

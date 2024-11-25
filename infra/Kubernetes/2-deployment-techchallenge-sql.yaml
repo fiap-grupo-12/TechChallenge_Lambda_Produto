@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-techchallenge-sql
+spec:
+  selector:
+    matchLabels:
+      app: pod-techchallenge-sql
+  template:
+    metadata:
+      name: pod-techchallenge-sql
+      labels:
+        app: pod-techchallenge-sql
+    spec:
+      containers:
+        - name: pod-techchallenge-sql
+          image: mcr.microsoft.com/mssql/server:2019-latest
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: MSSQL_SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: PASSWORD
+                  name: opaque-techchallenge
+          ports:
+            - containerPort: 1433

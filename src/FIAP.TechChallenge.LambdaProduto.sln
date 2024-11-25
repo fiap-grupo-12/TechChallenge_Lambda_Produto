@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{976CD303-03A5-4B3E-ACD5-22630E9F9C6B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{46EC7E4E-0BAA-45A4-9549-7A924116E363}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FIAP.TechChallenge.LambdaProduto.Infra", "Infra\FIAP.TechChallenge.LambdaProduto.Infra.csproj", "{B44AC19C-9DEE-47B3-A5EF-0F858CB25B87}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FIAP.TechChallenge.LambdaProduto.Application", "Application\FIAP.TechChallenge.LambdaProduto.Application.csproj", "{149B4A8D-D0A9-4798-95B6-2048833D3472}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FIAP.TechChallenge.LambdaProduto.Domain", "Domain\FIAP.TechChallenge.LambdaProduto.Domain.csproj", "{5B364736-587A-44DC-9619-1BAB21AC917A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FIAP.TechChallenge.LambdaProduto.API", "API\FIAP.TechChallenge.LambdaProduto.API.csproj", "{9BC1B78A-5A72-4C03-B4F5-B351D8DDA3C7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B44AC19C-9DEE-47B3-A5EF-0F858CB25B87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B44AC19C-9DEE-47B3-A5EF-0F858CB25B87}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B44AC19C-9DEE-47B3-A5EF-0F858CB25B87}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B44AC19C-9DEE-47B3-A5EF-0F858CB25B87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{149B4A8D-D0A9-4798-95B6-2048833D3472}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{149B4A8D-D0A9-4798-95B6-2048833D3472}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{149B4A8D-D0A9-4798-95B6-2048833D3472}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{149B4A8D-D0A9-4798-95B6-2048833D3472}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B364736-587A-44DC-9619-1BAB21AC917A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B364736-587A-44DC-9619-1BAB21AC917A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B364736-587A-44DC-9619-1BAB21AC917A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B364736-587A-44DC-9619-1BAB21AC917A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BC1B78A-5A72-4C03-B4F5-B351D8DDA3C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BC1B78A-5A72-4C03-B4F5-B351D8DDA3C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BC1B78A-5A72-4C03-B4F5-B351D8DDA3C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BC1B78A-5A72-4C03-B4F5-B351D8DDA3C7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B44AC19C-9DEE-47B3-A5EF-0F858CB25B87} = {976CD303-03A5-4B3E-ACD5-22630E9F9C6B}
+		{149B4A8D-D0A9-4798-95B6-2048833D3472} = {976CD303-03A5-4B3E-ACD5-22630E9F9C6B}
+		{5B364736-587A-44DC-9619-1BAB21AC917A} = {976CD303-03A5-4B3E-ACD5-22630E9F9C6B}
+		{9BC1B78A-5A72-4C03-B4F5-B351D8DDA3C7} = {976CD303-03A5-4B3E-ACD5-22630E9F9C6B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E361DD37-1932-48F9-BB87-DC80C4CA4ED3}
+	EndGlobalSection
+EndGlobal
