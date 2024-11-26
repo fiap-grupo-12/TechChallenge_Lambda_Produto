@@ -21,11 +21,6 @@ namespace FIAP.TechChallenge.LambdaProduto.Application.UseCases
         public IList<ProdutoResponse> Execute(int request)
         {
             var result = new List<ProdutoResponse>();
-            //var categoria = _categoriaRepository.GetByName(request);
-
-            //if (categoria is null)
-            //    return result;
-
             var produtos = _produtoRepository.GetByCategoria(request);
 
             return _mapper.Map<IList<ProdutoResponse>>(produtos);
