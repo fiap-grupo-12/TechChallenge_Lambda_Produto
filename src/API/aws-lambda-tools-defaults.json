@@ -15,13 +15,13 @@
     "function-timeout"      : 30,
     "function-handler"      : "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler",
     "framework"             : "net8.0",
-    "function-name"         : "LambdaProduto",
+    "function-name"         : "lambda_produto_function",
     "package-type"          : "Zip",
-    "function-role"         : "arn:aws:iam::730335559458:role/lambda_exec_LambdaProduto",
+    "function-role"         : "arn:aws:iam::381491874932:role/lambda_produto_execution_role",
     "function-subnets"      : "",
     "function-security-groups" : "",
     "tracing-mode"             : "PassThrough",
-    "environment-variables"    : "",
+    "environment-variables"    : "\"SQLServerConnection\"=\"teste\"",
     "image-tag"                : "",
     "function-description"     : ""
 }
