@@ -9,6 +9,7 @@ using FIAP.TechChallenge.LambdaProduto.Infra.Data.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
+//Extensions
 namespace FIAP.TechChallenge.LambdaProduto.API.Extensions
 {
     public static class DependencyInjection
