@@ -54,7 +54,7 @@ public class Function
                 ("POST", "/api/produto") => HandlePost(request, context),
                 ("PUT", "/api/produto") => HandlePut(request, context),
                 ("DELETE", var path) when path.StartsWith("/api/produto/") => HandleDelete(request, context),
-                _ => BuildResponse(404, new { Message = "Endpoint não encontrado" })
+                _ => BuildResponse(404, new { Message = "Endpoint " + request.HttpMethod.ToUpper() + " - " + request.Path + " nï¿½o encontrado" })
             };
         }
         catch (Exception ex)
@@ -75,7 +75,7 @@ public class Function
         }
         else
         {
-            return BuildResponse(400, new { Message = "Categoria inválida." });
+            return BuildResponse(400, new { Message = "Categoria invï¿½lida." });
         }
 
     }
@@ -104,7 +104,7 @@ public class Function
         var result = _removerProduto.Execute(int.Parse(id)).Result;
         return result
             ? BuildResponse(200, new { Message = "Produto removido com sucesso" })
-            : BuildResponse(404, new { Message = "Produto não encontrado." });
+            : BuildResponse(404, new { Message = "Produto nï¿½o encontrado." });
     }
 
     private static string ExtractPathParameter(string path, string basePath)
