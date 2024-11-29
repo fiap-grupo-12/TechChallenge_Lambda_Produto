@@ -24,9 +24,13 @@ namespace FIAP.TechChallenge.LambdaProduto.API.Extensions
             IMapper mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
 
-            // Repository
-            services.AddTransient<ICategoriaRepository, CategoriaRepository>();
-            services.AddTransient<IProdutoRepository, ProdutoRepository>();
+            // Repository DB
+            //services.AddTransient<ICategoriaRepository, CategoriaRepository>();
+            //services.AddTransient<IProdutoRepository, ProdutoRepository>();
+
+            // Repository in memory
+            services.AddTransient<ICategoriaRepository, CategoriaRepositoryInMemory>();
+            services.AddTransient<IProdutoRepository, ProdutoRepositoryInMemory>();
 
             // UseCase
             services.AddTransient<IAtualizarProdutoUseCase, AtualizarProdutoUseCase>();
