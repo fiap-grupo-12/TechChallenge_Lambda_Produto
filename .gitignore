@@ -45,3 +45,5 @@ msbuild.wrn
 
 Logs/
 /infra/.terraform/providers
+/infra/.terraform
+/infra/.terraform.lock.hcl
