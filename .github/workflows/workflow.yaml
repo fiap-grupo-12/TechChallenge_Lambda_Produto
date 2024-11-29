@@ -121,17 +121,37 @@ jobs:
         aws-region: us-east-1
         
     - name: Verificando se bucket está criado
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: |
-            BUCKET_NAME="terraform-tfstate-grupo12-fiap-2024-produto"
-            REGION="us-east-1"
+        BUCKET_NAME="code-lambdas-functions-produto"
+        REGION="us-east-1"
 
-            if ! aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
-              echo "Bucket não existe. Criando bucket..."
-              aws s3api create-bucket --bucket "$BUCKET_NAME"
-            else
-              echo "Bucket validado. Processo de upload."
-            fi
+        if ! aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
+          echo "Bucket não existe. Criando bucket..."
+          aws s3api create-bucket --bucket "$BUCKET_NAME" --region "$REGION"
 
+          # Aplicando política ao bucket após a criação
+          POLICY='{
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "lambda.amazonaws.com"
+                },
+                "Action": "s3:GetObject",
+                "Resource": "arn:aws:s3:::'"$BUCKET_NAME"'/*"
+              }
+            ]
+          }'
+
+          echo "$POLICY" > bucket-policy.json
+          aws s3api put-bucket-policy --bucket "$BUCKET_NAME" --policy file://bucket-policy.json
+          rm bucket-policy.json
+        else
+          echo "Bucket validado. Processo de upload."
+        fi
+        
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
     
