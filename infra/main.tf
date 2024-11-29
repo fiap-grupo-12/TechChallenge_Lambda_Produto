@@ -67,7 +67,7 @@ resource "aws_lambda_function" "pedido_function" {
   timeout       = 30
   handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
   # Codigo armazenado no S3
-  s3_bucket = "code-lambdas-functions"
+  s3_bucket = "code-lambdas-functions-produto"
   s3_key    = "lambda_produto_function.zip"
 }
 
