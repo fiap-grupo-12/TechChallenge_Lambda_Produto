@@ -44,3 +44,4 @@ msbuild.err
 msbuild.wrn
 
 Logs/
+/infra/.terraform/providers
