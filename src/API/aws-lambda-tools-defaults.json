@@ -17,11 +17,11 @@
     "framework"             : "net8.0",
     "function-name"         : "lambda_produto_function",
     "package-type"          : "Zip",
-    "function-role"         : "arn:aws:iam::891377117312:role/lambda_exec_lambda_produto_function",
-    "function-subnets"      : "",
-    "function-security-groups" : "",
+    "function-role"         : "arn:aws:iam::058264419859:role/lambda_produto_execution_role",
+    "function-subnets"      : "subnet-0f2f9a6c7f2f312ef,subnet-0a836d6554cfd321c",
+    "function-security-groups" : "sg-01cdb3a149b8adab2",
     "tracing-mode"             : "PassThrough",
-    "environment-variables"    : "\"SQLServerConnection\"=\"teste\"",
+    "environment-variables"    : "\"SQLServerConnection\"=\"Server=terraform-20241130203226984700000001.cjsoesy2mgu6.us-east-1.rds.amazonaws.com;Database=ByteMeBurger;User Id=techchallenge;Password=techchallenge;\"",
     "image-tag"                : "",
     "function-description"     : ""
 }

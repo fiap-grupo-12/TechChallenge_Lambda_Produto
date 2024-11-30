@@ -64,15 +64,21 @@ resource "aws_iam_role_policy_attachment" "lambda_execution_policy" {
   policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
-# VPC e Sub-rede
+# VPC e Sub-redes
 resource "aws_vpc" "main_vpc" {
   cidr_block = "10.0.0.0/16"
 }
 
 resource "aws_subnet" "lambda_subnet" {
-  vpc_id                  = aws_vpc.main_vpc.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-east-1a"
+  vpc_id            = aws_vpc.main_vpc.id
+  cidr_block        = "10.0.1.0/24"
+  availability_zone = "us-east-1a"
+}
+
+resource "aws_subnet" "lambda_subnet_2" {
+  vpc_id            = aws_vpc.main_vpc.id
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "us-east-1b"
 }
 
 # Segurança: Grupo de Segurança do RDS
@@ -84,7 +90,7 @@ resource "aws_security_group" "rds_sg" {
     from_port   = 1433
     to_port     = 1433
     protocol    = "tcp"
-    cidr_blocks = ["10.0.1.0/24"] # Permite acesso a partir da sub-rede onde está a Lambda
+    cidr_blocks = ["10.0.1.0/24", "10.0.2.0/24"] # Permite acesso a partir das sub-redes onde está a Lambda
   }
 
   egress {
@@ -134,7 +140,7 @@ resource "aws_db_instance" "sql_server" {
 # Grupo de Sub-redes para RDS
 resource "aws_db_subnet_group" "rds_subnet_group" {
   name       = "rds_subnet_group"
-  subnet_ids = [aws_subnet.lambda_subnet.id]
+  subnet_ids = [aws_subnet.lambda_subnet.id, aws_subnet.lambda_subnet_2.id]
 
   tags = {
     Name = "RDS subnet group"
@@ -161,9 +167,42 @@ resource "aws_lambda_function" "produto_function" {
 
   # Configuração de VPC para Lambda
   vpc_config {
-    subnet_ids         = [aws_subnet.lambda_subnet.id]
+    subnet_ids         = [aws_subnet.lambda_subnet.id, aws_subnet.lambda_subnet_2.id]
     security_group_ids = [aws_security_group.lambda_sg.id]
   }
+}
+
+resource "aws_lambda_function" "pedido_function" {
+  function_name = "lambda_pedido_function"
+  role          = aws_iam_role.lambda_execution_role.arn
+  runtime       = "dotnet8"
+  memory_size   = 512
+  timeout       = 30
+  handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
+  s3_bucket     = "code-lambdas-functions-produto2"
+  s3_key        = "lambda_produto_function.zip"
+}
+
+resource "aws_lambda_function" "cliente_function" {
+  function_name = "lambda_cliente_function"
+  role          = aws_iam_role.lambda_execution_role.arn
+  runtime       = "dotnet8"
+  memory_size   = 512
+  timeout       = 30
+  handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
+  s3_bucket     = "code-lambdas-functions-produto2"
+  s3_key        = "lambda_produto_function.zip"
+}
+
+resource "aws_lambda_function" "pagamento_function" {
+  function_name = "lambda_pagamento_function"
+  role          = aws_iam_role.lambda_execution_role.arn
+  runtime       = "dotnet8"
+  memory_size   = 512
+  timeout       = 30
+  handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
+  s3_bucket     = "code-lambdas-functions-produto2"
+  s3_key        = "lambda_produto_function.zip"
 }
 
 # Outputs
