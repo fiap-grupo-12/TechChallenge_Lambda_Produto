@@ -59,7 +59,7 @@ resource "aws_iam_role_policy_attachment" "lambda_execution_policy" {
   policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
-resource "aws_lambda_function" "pedido_function" {
+resource "aws_lambda_function" "produto_function" {
   function_name = "lambda_produto_function"
   role          = aws_iam_role.lambda_execution_role.arn
   runtime       = "dotnet8"
@@ -71,5 +71,43 @@ resource "aws_lambda_function" "pedido_function" {
   s3_key    = "lambda_produto_function.zip"
 }
 
+
+##Criação de lambdas somente para o API Gateway funcionar
+
+resource "aws_lambda_function" "pedido_function" {
+  function_name = "lambda_pedido_function"
+  role          = aws_iam_role.lambda_execution_role.arn
+  runtime       = "dotnet8"
+  memory_size   = 512
+  timeout       = 30
+  handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
+  # Codigo armazenado no S3
+  s3_bucket = "code-lambdas-functions-produto"
+  s3_key    = "lambda_produto_function.zip"
+}
+
+resource "aws_lambda_function" "pagamento_function" {
+  function_name = "lambda_pagamento_function"
+  role          = aws_iam_role.lambda_execution_role.arn
+  runtime       = "dotnet8"
+  memory_size   = 512
+  timeout       = 30
+  handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
+  # Codigo armazenado no S3
+  s3_bucket = "code-lambdas-functions-produto"
+  s3_key    = "lambda_produto_function.zip"
+}
+
+resource "aws_lambda_function" "cliente_function" {
+  function_name = "lambda_cliente_function"
+  role          = aws_iam_role.lambda_execution_role.arn
+  runtime       = "dotnet8"
+  memory_size   = 512
+  timeout       = 30
+  handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
+  # Codigo armazenado no S3
+  s3_bucket = "code-lambdas-functions-produto"
+  s3_key    = "lambda_produto_function.zip"
+}
 #Criacao do SQL Server RDS
 

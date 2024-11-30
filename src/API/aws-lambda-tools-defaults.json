@@ -17,7 +17,7 @@
     "framework"             : "net8.0",
     "function-name"         : "lambda_produto_function",
     "package-type"          : "Zip",
-    "function-role"         : "arn:aws:iam::381491874932:role/lambda_produto_execution_role",
+    "function-role"         : "arn:aws:iam::891377117312:role/lambda_exec_lambda_produto_function",
     "function-subnets"      : "",
     "function-security-groups" : "",
     "tracing-mode"             : "PassThrough",
