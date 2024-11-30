@@ -50,10 +50,10 @@ public class Function
         {
             return (request.HttpMethod.ToUpper(), request.Path) switch
             {
-                ("GET", var path) when path.StartsWith("/api/produto/") => HandleGet(request, context),
-                ("POST", "/api/produto") => HandlePost(request, context),
-                ("PUT", "/api/produto") => HandlePut(request, context),
-                ("DELETE", var path) when path.StartsWith("/api/produto/") => HandleDelete(request, context),
+                ("GET", var path) when path.StartsWith("/produto/") => HandleGet(request, context),
+                ("POST", "/produto") => HandlePost(request, context),
+                ("PUT", "/produto") => HandlePut(request, context),
+                ("DELETE", var path) when path.StartsWith("/produto/") => HandleDelete(request, context),
                 _ => BuildResponse(404, new { Message = "Endpoint " + request.HttpMethod.ToUpper() + " - " + request.Path + " n�o encontrado" })
             };
         }
@@ -66,7 +66,7 @@ public class Function
 
     private APIGatewayProxyResponse HandleGet(APIGatewayProxyRequest request, ILambdaContext context)
     {
-        var categoria = ExtractPathParameter(request.Path, "api/produto");
+        var categoria = ExtractPathParameter(request.Path, "produto");
 
         if (int.TryParse(categoria, out int idCategoria))
         {
@@ -100,7 +100,7 @@ public class Function
 
     private APIGatewayProxyResponse HandleDelete(APIGatewayProxyRequest request, ILambdaContext context)
     {
-        var id = ExtractPathParameter(request.Path, "api/produto");
+        var id = ExtractPathParameter(request.Path, "produto");
         var result = _removerProduto.Execute(int.Parse(id)).Result;
         return result
             ? BuildResponse(200, new { Message = "Produto removido com sucesso" })
