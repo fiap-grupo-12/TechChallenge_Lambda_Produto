@@ -1,7 +1,3 @@
-provider "aws" {
-  region = "us-east-1"
-}
-
 # Segurança: Grupo de Segurança do RDS
 resource "aws_security_group" "rds_sg" {
   name_prefix = "rds-sg-"
