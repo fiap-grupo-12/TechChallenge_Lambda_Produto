@@ -30,8 +30,8 @@ namespace FIAP.TechChallenge.LambdaProduto.API.Extensions
             //services.AddTransient<IProdutoRepository, ProdutoRepository>();
 
             // Repository in memory
-            services.AddTransient<ICategoriaRepository, CategoriaRepositoryInMemory>();
-            services.AddTransient<IProdutoRepository, ProdutoRepositoryInMemory>();
+            services.AddTransient<ICategoriaRepository, CategoriaRepository>();
+            services.AddTransient<IProdutoRepository, ProdutoRepository>();
 
             // UseCase
             services.AddTransient<IAtualizarProdutoUseCase, AtualizarProdutoUseCase>();
