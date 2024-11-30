@@ -149,7 +149,7 @@ resource "aws_lambda_function" "produto_function" {
   memory_size   = 512
   timeout       = 30
   handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
-  s3_bucket     = "code-lambdas-functions-produto"
+  s3_bucket     = "code-lambdas-functions-produto2"
   s3_key        = "lambda_produto_function.zip"
 
   # Variáveis de ambiente

@@ -84,7 +84,7 @@ jobs:
       - name: Verificando se bucket está criado
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          BUCKET_NAME="code-lambdas-functions-produto"
+          BUCKET_NAME="code-lambdas-functions-produto2"
             REGION="us-east-1"
 
             if ! aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
@@ -97,7 +97,7 @@ jobs:
       - name: Upload to S3
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          BUCKET_NAME="code-lambdas-functions-produto"
+          BUCKET_NAME="code-lambdas-functions-produto2"
           aws s3api head-bucket --bucket "$BUCKET_NAME" || aws s3api create-bucket --bucket "$BUCKET_NAME"
           aws s3 cp lambda_produto_function.zip s3://$BUCKET_NAME/
 
@@ -123,7 +123,7 @@ jobs:
     - name: Verificando se bucket está criado
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: |
-        BUCKET_NAME="code-lambdas-functions-produto"
+        BUCKET_NAME="code-lambdas-functions-produto2"
         REGION="us-east-1"
 
         if ! aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
