@@ -10,7 +10,7 @@ terraform {
   }
 }
 
-# IAM Role para Lambda
+# IAM Role for Lambda
 resource "aws_iam_role" "lambda_execution_role" {
   name = "lambda_produto_execution_role"
 
@@ -28,7 +28,7 @@ resource "aws_iam_role" "lambda_execution_role" {
   })
 }
 
-# Política para Lambda
+# Policy for Lambda
 resource "aws_iam_policy" "lambda_policy" {
   name        = "lambda_produto_policy"
   description = "IAM policy for Lambda execution"
@@ -38,20 +38,14 @@ resource "aws_iam_policy" "lambda_policy" {
       {
         Effect = "Allow"
         Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "dynamodb:DeleteItem",
-          "dynamodb:GetItem",
-          "dynamodb:PutItem",
-          "dynamodb:Query",
-          "dynamodb:Scan",
-          "dynamodb:UpdateItem",
-          "dynamodb:DescribeTable",
           "ec2:DescribeNetworkInterfaces",
           "ec2:CreateNetworkInterface",
           "ec2:DeleteNetworkInterface",
-          "ec2:AttachNetworkInterface"
+          "ec2:AttachNetworkInterface",
+          "secretsmanager:GetSecretValue",
+          "rds:*",
+          "logs:*",
+          "cloudwatch:*",
         ]
         Resource = "*"
       }
@@ -64,33 +58,25 @@ resource "aws_iam_role_policy_attachment" "lambda_execution_policy" {
   policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
-# VPC e Sub-redes
-resource "aws_vpc" "main_vpc" {
-  cidr_block = "10.0.0.0/16"
+# Use Default VPC and Subnets
+data "aws_vpc" "default" {
+  default = true
 }
 
-resource "aws_subnet" "lambda_subnet" {
-  vpc_id            = aws_vpc.main_vpc.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-east-1a"
+data "aws_subnet_ids" "default" {
+  vpc_id = data.aws_vpc.default.id
 }
 
-resource "aws_subnet" "lambda_subnet_2" {
-  vpc_id            = aws_vpc.main_vpc.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "us-east-1b"
-}
-
-# Segurança: Grupo de Segurança do RDS
-resource "aws_security_group" "rds_sg" {
-  vpc_id = aws_vpc.main_vpc.id
-  name_prefix = "rds-sg-"
+# Security Group for RDS and Lambda
+resource "aws_security_group" "common_sg" {
+  vpc_id = data.aws_vpc.default.id
+  name   = "common-sg"
 
   ingress {
     from_port   = 1433
     to_port     = 1433
     protocol    = "tcp"
-    cidr_blocks = ["10.0.1.0/24", "10.0.2.0/24"] # Permite acesso a partir das sub-redes onde está a Lambda
+    cidr_blocks = ["0.0.0.0/0"] # Allow access to SQL Server from anywhere
   }
 
   egress {
@@ -98,27 +84,6 @@ resource "aws_security_group" "rds_sg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-# Segurança: Grupo de Segurança do Lambda
-resource "aws_security_group" "lambda_sg" {
-  vpc_id = aws_vpc.main_vpc.id
-  name_prefix = "lambda-sg-"
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Permitir que Lambda se conecte ao SQL Server no RDS
-  ingress {
-    from_port   = 1433
-    to_port     = 1433
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"] # Permite acesso ao RDS na VPC principal
   }
 }
 
@@ -133,21 +98,21 @@ resource "aws_db_instance" "sql_server" {
   password               = "techchallenge"
   parameter_group_name   = "default.sqlserver-ex-15.0"
   skip_final_snapshot    = true
-  vpc_security_group_ids = [aws_security_group.rds_sg.id]
+  vpc_security_group_ids = [aws_security_group.common_sg.id]
   db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.name
 }
 
-# Grupo de Sub-redes para RDS
+# Subnet Group for RDS
 resource "aws_db_subnet_group" "rds_subnet_group" {
   name       = "rds_subnet_group"
-  subnet_ids = [aws_subnet.lambda_subnet.id, aws_subnet.lambda_subnet_2.id]
+  subnet_ids = data.aws_subnet_ids.default.ids
 
   tags = {
     Name = "RDS subnet group"
   }
 }
 
-# Lambda de Produto - Atualizado para usar a VPC
+# Lambda Function
 resource "aws_lambda_function" "produto_function" {
   function_name = "lambda_produto_function"
   role          = aws_iam_role.lambda_execution_role.arn
@@ -158,21 +123,14 @@ resource "aws_lambda_function" "produto_function" {
   s3_bucket     = "code-lambdas-functions-produto2"
   s3_key        = "lambda_produto_function.zip"
 
-  # Variáveis de ambiente
+  # Environment Variables
   environment {
     variables = {
       SQLServerConnection = "Server=${aws_db_instance.sql_server.address};Database=ByteMeBurger;User Id=techchallenge;Password=techchallenge;"
     }
   }
 
-  # Configuração de VPC para Lambda
-  vpc_config {
-    subnet_ids         = [aws_subnet.lambda_subnet.id, aws_subnet.lambda_subnet_2.id]
-    security_group_ids = [aws_security_group.lambda_sg.id]
-  }
-}
-
-resource "aws_lambda_function" "pedido_function" {
+  resource "aws_lambda_function" "pedido_function" {
   function_name = "lambda_pedido_function"
   role          = aws_iam_role.lambda_execution_role.arn
   runtime       = "dotnet8"
@@ -203,6 +161,12 @@ resource "aws_lambda_function" "pagamento_function" {
   handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
   s3_bucket     = "code-lambdas-functions-produto2"
   s3_key        = "lambda_produto_function.zip"
+}
+
+vpc_config {
+    subnet_ids         = data.aws_subnet_ids.default.ids
+    security_group_ids = [aws_security_group.common_sg.id]
+  }
 }
 
 # Outputs
