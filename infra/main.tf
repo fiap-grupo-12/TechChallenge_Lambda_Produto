@@ -45,7 +45,7 @@ resource "aws_iam_policy" "lambda_policy" {
           "secretsmanager:GetSecretValue",
           "rds:*",
           "logs:*",
-          "cloudwatch:*",
+          "cloudwatch:*"
         ]
         Resource = "*"
       }
@@ -64,11 +64,7 @@ variable "vpc_id" {
   type        = string
 }
 
-# main.tf
-provider "aws" {
-  region = "us-west-2"
-}
-
+# Data source to get subnets by VPC ID
 data "aws_subnets" "default" {
   filter {
     name   = "vpc-id"
@@ -76,22 +72,9 @@ data "aws_subnets" "default" {
   }
 }
 
-output "subnet_ids" {
-  value = data.aws_subnets.default.ids
-}
-
-# Use Default VPC and Subnets
-data "aws_vpc" "default" {
-  default = true
-}
-
-data "aws_subnet_ids" "default" {
-  vpc_id = data.aws_vpc.default.id
-}
-
 # Security Group for RDS and Lambda
 resource "aws_security_group" "common_sg" {
-  vpc_id = data.aws_vpc.default.id
+  vpc_id = var.vpc_id
   name   = "common-sg"
 
   ingress {
@@ -110,6 +93,15 @@ resource "aws_security_group" "common_sg" {
 }
 
 # RDS SQL Server
+resource "aws_db_subnet_group" "rds_subnet_group" {
+  name       = "my-rds-subnet-group"
+  subnet_ids = data.aws_subnets.default.ids
+
+  tags = {
+    Name = "RDS Subnet Group"
+  }
+}
+
 resource "aws_db_instance" "sql_server" {
   allocated_storage      = 20
   storage_type           = "gp2"
@@ -124,18 +116,7 @@ resource "aws_db_instance" "sql_server" {
   db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.name
 }
 
-data "aws_subnets" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [var.vpc_id]  # Certifique-se de definir a variável vpc_id corretamente
-  }
-}
-
-output "subnet_ids" {
-  value = data.aws_subnets.default.ids
-}
-
-# Lambda Function
+# Lambda Function Template
 resource "aws_lambda_function" "produto_function" {
   function_name = "lambda_produto_function"
   role          = aws_iam_role.lambda_execution_role.arn
@@ -146,14 +127,20 @@ resource "aws_lambda_function" "produto_function" {
   s3_bucket     = "code-lambdas-functions-produto2"
   s3_key        = "lambda_produto_function.zip"
 
+  vpc_config {
+    subnet_ids         = data.aws_subnets.default.ids
+    security_group_ids = [aws_security_group.common_sg.id]
+  }
+
   # Environment Variables
   environment {
     variables = {
       SQLServerConnection = "Server=${aws_db_instance.sql_server.address};Database=ByteMeBurger;User Id=techchallenge;Password=techchallenge;"
     }
   }
+}
 
-  resource "aws_lambda_function" "pedido_function" {
+resource "aws_lambda_function" "pedido_function" {
   function_name = "lambda_pedido_function"
   role          = aws_iam_role.lambda_execution_role.arn
   runtime       = "dotnet8"
@@ -161,7 +148,12 @@ resource "aws_lambda_function" "produto_function" {
   timeout       = 30
   handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
   s3_bucket     = "code-lambdas-functions-produto2"
-  s3_key        = "lambda_produto_function.zip"
+  s3_key        = "lambda_pedido_function.zip"
+
+  vpc_config {
+    subnet_ids         = data.aws_subnets.default.ids
+    security_group_ids = [aws_security_group.common_sg.id]
+  }
 }
 
 resource "aws_lambda_function" "cliente_function" {
@@ -172,7 +164,12 @@ resource "aws_lambda_function" "cliente_function" {
   timeout       = 30
   handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
   s3_bucket     = "code-lambdas-functions-produto2"
-  s3_key        = "lambda_produto_function.zip"
+  s3_key        = "lambda_cliente_function.zip"
+
+  vpc_config {
+    subnet_ids         = data.aws_subnets.default.ids
+    security_group_ids = [aws_security_group.common_sg.id]
+  }
 }
 
 resource "aws_lambda_function" "pagamento_function" {
@@ -183,11 +180,10 @@ resource "aws_lambda_function" "pagamento_function" {
   timeout       = 30
   handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
   s3_bucket     = "code-lambdas-functions-produto2"
-  s3_key        = "lambda_produto_function.zip"
-}
+  s3_key        = "lambda_pagamento_function.zip"
 
-vpc_config {
-    subnet_ids         = data.aws_subnet_ids.default.ids
+  vpc_config {
+    subnet_ids         = data.aws_subnets.default.ids
     security_group_ids = [aws_security_group.common_sg.id]
   }
 }
