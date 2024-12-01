@@ -47,3 +47,4 @@ Logs/
 /infra/.terraform/providers
 /infra/.terraform
 /infra/.terraform.lock.hcl
+infra/.terraform.lock.hcl
