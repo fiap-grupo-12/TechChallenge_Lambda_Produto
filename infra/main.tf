@@ -112,9 +112,58 @@ resource "aws_db_instance" "sql_server" {
   username               = "techchallenge"
   password               = "techchallenge"
   parameter_group_name   = "default.sqlserver-ex-15.0"
+   publicly_accessible   = true
   skip_final_snapshot    = true
   vpc_security_group_ids = [aws_security_group.common_sg.id]
   db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.name
+}
+
+# Salvar o script SQL em um arquivo local
+resource "local_file" "init_sql_script" {
+  content = <<EOT
+IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'ByteMeBurger')
+  BEGIN
+    CREATE DATABASE ByteMeBurger;
+    USE ByteMeBurger;
+
+    -- Criação da tabela Categoria
+    CREATE TABLE Categorias (
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        Nome NVARCHAR(MAX)
+    );
+
+    -- Criação da tabela Produto
+    CREATE TABLE Produtos (
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        Nome NVARCHAR(MAX),
+        Descricao NVARCHAR(MAX),
+        Valor FLOAT NOT NULL,
+        CategoriaProdutoId INT,
+        FOREIGN KEY (CategoriaProdutoId) REFERENCES Categorias(Id)
+    );
+
+    -- Inserção de categorias
+    INSERT INTO Categorias (Nome) VALUES ('Lanche');
+    INSERT INTO Categorias (Nome) VALUES ('Acompanhamento');
+    INSERT INTO Categorias (Nome) VALUES ('Bebida');
+    INSERT INTO Categorias (Nome) VALUES ('Sobremesa');
+  END
+EOT
+  filename = "init.sql"
+}
+
+# Executar o script SQL após a criação do RDS
+resource "null_resource" "run_init_sql" {
+  depends_on = [aws_db_instance.sql_server]
+
+  provisioner "local-exec" {
+    command = <<EOT
+sqlcmd -S ${aws_db_instance.sql_server.address},1433 \
+  -U techchallenge \
+  -P techchallenge \
+  -i ${local_file.init_sql_script.filename}
+EOT
+  }
 }
 
 # Lambda Function Template
