@@ -19,8 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\API\FIAP.TechChallenge.LambdaProduto.API.csproj" />
-    <ProjectReference Include="..\Application\FIAP.TechChallenge.LambdaProduto.Application.csproj" />
+    <ProjectReference Include="..\..\src\API\FIAP.TechChallenge.LambdaProduto.API.csproj" />
+    <ProjectReference Include="..\..\src\Application\FIAP.TechChallenge.LambdaProduto.Application.csproj" />
+    <ProjectReference Include="..\..\src\Domain\FIAP.TechChallenge.LambdaProduto.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
