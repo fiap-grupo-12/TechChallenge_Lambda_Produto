@@ -149,7 +149,7 @@ resource "aws_lambda_function" "pedido_function" {
   timeout       = 30
   handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
   s3_bucket     = "code-lambdas-functions-produto2"
-  s3_key        = "lambda_pedido_function.zip"
+  s3_key        = "lambda_produto_function.zip"
 
   vpc_config {
     subnet_ids         = data.aws_subnets.default.ids
@@ -165,7 +165,7 @@ resource "aws_lambda_function" "cliente_function" {
   timeout       = 30
   handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
   s3_bucket     = "code-lambdas-functions-produto2"
-  s3_key        = "lambda_cliente_function.zip"
+  s3_key        = "lambda_produto_function.zip"
 
   vpc_config {
     subnet_ids         = data.aws_subnets.default.ids
@@ -181,7 +181,7 @@ resource "aws_lambda_function" "pagamento_function" {
   timeout       = 30
   handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
   s3_bucket     = "code-lambdas-functions-produto2"
-  s3_key        = "lambda_pagamento_function.zip"
+  s3_key        = "lambda_produto_function.zip"
 
   vpc_config {
     subnet_ids         = data.aws_subnets.default.ids
