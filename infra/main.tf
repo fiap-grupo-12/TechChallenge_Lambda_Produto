@@ -58,6 +58,28 @@ resource "aws_iam_role_policy_attachment" "lambda_execution_policy" {
   policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
+# variables.tf
+variable "vpc_id" {
+  description = "The ID of the VPC"
+  type        = string
+}
+
+# main.tf
+provider "aws" {
+  region = "us-west-2"
+}
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
+}
+
+output "subnet_ids" {
+  value = data.aws_subnets.default.ids
+}
+
 # Use Default VPC and Subnets
 data "aws_vpc" "default" {
   default = true
@@ -102,14 +124,15 @@ resource "aws_db_instance" "sql_server" {
   db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.name
 }
 
-# Subnet Group for RDS
-resource "aws_db_subnet_group" "rds_subnet_group" {
-  name       = "rds_subnet_group"
-  subnet_ids = data.aws_subnet_ids.default.ids
-
-  tags = {
-    Name = "RDS subnet group"
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]  # Certifique-se de definir a variável vpc_id corretamente
   }
+}
+
+output "subnet_ids" {
+  value = data.aws_subnets.default.ids
 }
 
 # Lambda Function
