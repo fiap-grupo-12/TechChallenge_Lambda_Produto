@@ -62,6 +62,7 @@ resource "aws_iam_role_policy_attachment" "lambda_execution_policy" {
 variable "vpc_id" {
   description = "The ID of the VPC"
   type        = string
+  default     = "vpc-02fbb372c6278c13b"
 }
 
 # Data source to get subnets by VPC ID
