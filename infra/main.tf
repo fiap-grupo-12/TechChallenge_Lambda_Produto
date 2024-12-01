@@ -58,24 +58,22 @@ resource "aws_iam_role_policy_attachment" "lambda_execution_policy" {
   policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
-# variables.tf
-variable "vpc_id" {
-  description = "The ID of the VPC"
-  type        = string
-  default     = "vpc-02fbb372c6278c13b"
+# Data source to get the default VPC
+data "aws_vpc" "default" {
+  default = true
 }
 
 # Data source to get subnets by VPC ID
 data "aws_subnets" "default" {
   filter {
     name   = "vpc-id"
-    values = [var.vpc_id]
+    values = [data.aws_vpc.default.id]
   }
 }
 
 # Security Group for RDS and Lambda
 resource "aws_security_group" "common_sg" {
-  vpc_id = var.vpc_id
+  vpc_id = data.aws_vpc.default.id
   name   = "common-sg"
 
   ingress {
@@ -121,18 +119,29 @@ resource "aws_db_instance" "sql_server" {
 # Salvar o script SQL em um arquivo local
 resource "local_file" "init_sql_script" {
   content = <<EOT
+-- Bloco 1: Verificar e criar o banco de dados
 IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'ByteMeBurger')
-  BEGIN
+BEGIN
     CREATE DATABASE ByteMeBurger;
-    USE ByteMeBurger;
+END;
+GO
 
-    -- Criação da tabela Categoria
+-- Bloco 2: Usar o banco de dados e criar tabelas
+USE ByteMeBurger;
+GO
+
+-- Criação da tabela Categoria
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name = 'Categorias' AND xtype = 'U')
+BEGIN
     CREATE TABLE Categorias (
         Id INT IDENTITY(1,1) PRIMARY KEY,
         Nome NVARCHAR(MAX)
     );
+END;
 
-    -- Criação da tabela Produto
+-- Criação da tabela Produto
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name = 'Produtos' AND xtype = 'U')
+BEGIN
     CREATE TABLE Produtos (
         Id INT IDENTITY(1,1) PRIMARY KEY,
         Nome NVARCHAR(MAX),
@@ -141,13 +150,17 @@ IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'ByteMeBurger')
         CategoriaProdutoId INT,
         FOREIGN KEY (CategoriaProdutoId) REFERENCES Categorias(Id)
     );
+END;
 
-    -- Inserção de categorias
+-- Inserção de categorias, apenas se não existirem
+IF NOT EXISTS (SELECT * FROM Categorias)
+BEGIN
     INSERT INTO Categorias (Nome) VALUES ('Lanche');
     INSERT INTO Categorias (Nome) VALUES ('Acompanhamento');
     INSERT INTO Categorias (Nome) VALUES ('Bebida');
     INSERT INTO Categorias (Nome) VALUES ('Sobremesa');
-  END
+END;
+GO
 EOT
   filename = "init.sql"
 }
@@ -158,10 +171,7 @@ resource "null_resource" "run_init_sql" {
 
   provisioner "local-exec" {
     command = <<EOT
-sqlcmd -S ${aws_db_instance.sql_server.address},1433 \
-  -U techchallenge \
-  -P techchallenge \
-  -i ${local_file.init_sql_script.filename}
+sqlcmd -S ${aws_db_instance.sql_server.address}  -U techchallenge  -P techchallenge  -i ${local_file.init_sql_script.filename}
 EOT
   }
 }
