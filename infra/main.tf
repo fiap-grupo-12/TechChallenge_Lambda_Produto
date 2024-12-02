@@ -4,10 +4,14 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket = "terraform-tfstate-grupo12-fiap-2024-produto2"
+    bucket = "terraform-tfstate-grupo12-fiap-2024-produto"
     key    = "lambda_produto/terraform.tfstate"
     region = "us-east-1"
   }
+}
+
+data "aws_vpc" "default" {
+  default = true
 }
 
 # IAM Role for Lambda
@@ -58,11 +62,6 @@ resource "aws_iam_role_policy_attachment" "lambda_execution_policy" {
   policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
-# Data source to get the default VPC
-data "aws_vpc" "default" {
-  default = true
-}
-
 # Data source to get subnets by VPC ID
 data "aws_subnets" "default" {
   filter {
@@ -110,70 +109,10 @@ resource "aws_db_instance" "sql_server" {
   username               = "techchallenge"
   password               = "techchallenge"
   parameter_group_name   = "default.sqlserver-ex-15.0"
-   publicly_accessible   = true
+  publicly_accessible    = true
   skip_final_snapshot    = true
   vpc_security_group_ids = [aws_security_group.common_sg.id]
   db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.name
-}
-
-# Salvar o script SQL em um arquivo local
-resource "local_file" "init_sql_script" {
-  content = <<EOT
--- Bloco 1: Verificar e criar o banco de dados
-IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'ByteMeBurger')
-BEGIN
-    CREATE DATABASE ByteMeBurger;
-END;
-GO
-
--- Bloco 2: Usar o banco de dados e criar tabelas
-USE ByteMeBurger;
-GO
-
--- Criação da tabela Categoria
-IF NOT EXISTS (SELECT * FROM sysobjects WHERE name = 'Categorias' AND xtype = 'U')
-BEGIN
-    CREATE TABLE Categorias (
-        Id INT IDENTITY(1,1) PRIMARY KEY,
-        Nome NVARCHAR(MAX)
-    );
-END;
-
--- Criação da tabela Produto
-IF NOT EXISTS (SELECT * FROM sysobjects WHERE name = 'Produtos' AND xtype = 'U')
-BEGIN
-    CREATE TABLE Produtos (
-        Id INT IDENTITY(1,1) PRIMARY KEY,
-        Nome NVARCHAR(MAX),
-        Descricao NVARCHAR(MAX),
-        Valor FLOAT NOT NULL,
-        CategoriaProdutoId INT,
-        FOREIGN KEY (CategoriaProdutoId) REFERENCES Categorias(Id)
-    );
-END;
-
--- Inserção de categorias, apenas se não existirem
-IF NOT EXISTS (SELECT * FROM Categorias)
-BEGIN
-    INSERT INTO Categorias (Nome) VALUES ('Lanche');
-    INSERT INTO Categorias (Nome) VALUES ('Acompanhamento');
-    INSERT INTO Categorias (Nome) VALUES ('Bebida');
-    INSERT INTO Categorias (Nome) VALUES ('Sobremesa');
-END;
-GO
-EOT
-  filename = "init.sql"
-}
-
-# Executar o script SQL após a criação do RDS
-resource "null_resource" "run_init_sql" {
-  depends_on = [aws_db_instance.sql_server]
-
-  provisioner "local-exec" {
-    command = <<EOT
-sqlcmd -S ${aws_db_instance.sql_server.address}  -U techchallenge  -P techchallenge  -i ${local_file.init_sql_script.filename}
-EOT
-  }
 }
 
 # Lambda Function Template
@@ -184,7 +123,7 @@ resource "aws_lambda_function" "produto_function" {
   memory_size   = 512
   timeout       = 30
   handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
-  s3_bucket     = "code-lambdas-functions-produto2"
+  s3_bucket     = "code-lambdas-functions-produto"
   s3_key        = "lambda_produto_function.zip"
 
   vpc_config {
@@ -197,54 +136,6 @@ resource "aws_lambda_function" "produto_function" {
     variables = {
       SQLServerConnection = "Server=${aws_db_instance.sql_server.address};Database=ByteMeBurger;User Id=techchallenge;Password=techchallenge;"
     }
-  }
-}
-
-resource "aws_lambda_function" "pedido_function" {
-  function_name = "lambda_pedido_function"
-  role          = aws_iam_role.lambda_execution_role.arn
-  runtime       = "dotnet8"
-  memory_size   = 512
-  timeout       = 30
-  handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
-  s3_bucket     = "code-lambdas-functions-produto2"
-  s3_key        = "lambda_produto_function.zip"
-
-  vpc_config {
-    subnet_ids         = data.aws_subnets.default.ids
-    security_group_ids = [aws_security_group.common_sg.id]
-  }
-}
-
-resource "aws_lambda_function" "cliente_function" {
-  function_name = "lambda_cliente_function"
-  role          = aws_iam_role.lambda_execution_role.arn
-  runtime       = "dotnet8"
-  memory_size   = 512
-  timeout       = 30
-  handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
-  s3_bucket     = "code-lambdas-functions-produto2"
-  s3_key        = "lambda_produto_function.zip"
-
-  vpc_config {
-    subnet_ids         = data.aws_subnets.default.ids
-    security_group_ids = [aws_security_group.common_sg.id]
-  }
-}
-
-resource "aws_lambda_function" "pagamento_function" {
-  function_name = "lambda_pagamento_function"
-  role          = aws_iam_role.lambda_execution_role.arn
-  runtime       = "dotnet8"
-  memory_size   = 512
-  timeout       = 30
-  handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
-  s3_bucket     = "code-lambdas-functions-produto2"
-  s3_key        = "lambda_produto_function.zip"
-
-  vpc_config {
-    subnet_ids         = data.aws_subnets.default.ids
-    security_group_ids = [aws_security_group.common_sg.id]
   }
 }
 

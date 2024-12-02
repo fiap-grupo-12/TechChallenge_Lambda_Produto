@@ -29,7 +29,7 @@ namespace FIAP.TechChallenge.LambdaProduto.UnitTests
         public void Execute_ShouldReturnMappedProdutos_WhenCategoriaExists()
         {
             // Arrange
-            var produtos = new List<Produto> { new Produto { Id = 1, Nome = "Produto 1", Descricao = "Descricao 1", Valor = 50, CategoriaProduto = new Categoria { Id = 1, Nome = "Categoria Existente" } }, new Produto { Id = 2, Nome = "Produto 2", Descricao = "Descricao 2", Valor = 100, CategoriaProduto = new Categoria { Id = 1, Nome = "Categoria Existente" } } };
+            var produtos = new List<Produto> { new Produto { Id = 1, Nome = "Produto 1", Descricao = "Descricao 1", Valor = 50, CategoriaProduto = new Categoria { Id = 1, Nome = "Lanche" } }, new Produto { Id = 2, Nome = "Produto 2", Descricao = "Descricao 2", Valor = 100, CategoriaProduto = new Categoria { Id = 1, Nome = "Categoria Existente" } } };
             _produtoRepositoryMock.Setup(repo => repo.GetByCategoria(It.IsAny<int>())).Returns(produtos);
 
             var mappedProdutos = new List<ProdutoResponse> {
@@ -39,7 +39,7 @@ namespace FIAP.TechChallenge.LambdaProduto.UnitTests
             _mapperMock.Setup(mapper => mapper.Map<IList<ProdutoResponse>>(produtos)).Returns(mappedProdutos);
 
             // Act
-            var result = _useCase.Execute(1);
+            var result = _useCase.Execute("Lanche");
 
             // Assert
             Assert.Equal(mappedProdutos, result);
@@ -54,7 +54,7 @@ namespace FIAP.TechChallenge.LambdaProduto.UnitTests
             _mapperMock.Setup(mapper => mapper.Map<IList<ProdutoResponse>>(It.IsAny<IList<Produto>>())).Returns(new List<ProdutoResponse>());
 
             // Act
-            var result = _useCase.Execute(1);
+            var result = _useCase.Execute("Lanche");
 
             // Assert
             Assert.Empty(result);
