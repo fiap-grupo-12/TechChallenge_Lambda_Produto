@@ -3,6 +3,8 @@ name: 'Terraform'
 on:
   push:
     branches: [ "main", "release/*" ]
+  pull_request:
+    branches: [ "main" ]
 
 permissions:
   pull-requests: read
@@ -59,7 +61,7 @@ jobs:
       run:
         working-directory: ./src/API
         shell: bash
-
+    if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET
@@ -69,12 +71,11 @@ jobs:
 
       - name: Install Amazon Lambda Tools
         run: dotnet tool install -g Amazon.Lambda.Tools
-        
+
       - name: Publish Lambda Package
         run: dotnet lambda package --configuration Release --output-package ./lambda_produto_function.zip
 
       - name: Configure AWS credentials
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -82,89 +83,53 @@ jobs:
           aws-region: us-east-1
 
       - name: Verificando se bucket está criado
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           BUCKET_NAME="code-lambdas-functions-produto"
-            REGION="us-east-1"
+          REGION="us-east-1"
 
-            if ! aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
-              echo "Bucket não existe. Criando bucket..."
-              aws s3api create-bucket --bucket "$BUCKET_NAME"
-            else
-              echo "Bucket validado. Processo de upload."
-            fi
+          if ! aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
+            echo "Bucket não existe. Criando bucket..."
+            aws s3api create-bucket --bucket "$BUCKET_NAME" --region "$REGION"
+          else
+            echo "Bucket validado. Processo de upload."
+          fi
 
       - name: Upload to S3
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           BUCKET_NAME="code-lambdas-functions-produto"
-          aws s3api head-bucket --bucket "$BUCKET_NAME" || aws s3api create-bucket --bucket "$BUCKET_NAME"
           aws s3 cp lambda_produto_function.zip s3://$BUCKET_NAME/
 
-  CreateLambda: 
-    needs: 'Publish'
-    runs-on: ubuntu-latest 
+  Infra:
+    needs: Publish
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./infra
         shell: bash
-
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v3
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-        
-    - name: Verificando se bucket está criado
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: |
-        BUCKET_NAME="terraform-tfstate-grupo12-fiap-2024-produto"
-        REGION="us-east-1"
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
-        if ! aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
-          echo "Bucket não existe. Criando bucket..."
-          aws s3api create-bucket --bucket "$BUCKET_NAME" --region "$REGION"
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
 
-          # Aplicando política ao bucket após a criação
-          POLICY='{
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Effect": "Allow",
-                "Principal": {
-                  "Service": "lambda.amazonaws.com"
-                },
-                "Action": "s3:GetObject",
-                "Resource": "arn:aws:s3:::'"$BUCKET_NAME"'/*"
-              }
-            ]
-          }'
+      - name: Terraform Init
+        run: terraform init -reconfigure
 
-          echo "$POLICY" > bucket-policy.json
-          aws s3api put-bucket-policy --bucket "$BUCKET_NAME" --policy file://bucket-policy.json
-          rm bucket-policy.json
-        else
-          echo "Bucket validado. Processo de upload."
-        fi
-        
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-    
-    - name: Terraform Init
-      run: terraform init -reconfigure
+      - name: Terraform Format
+        run: terraform fmt -check
 
-    - name: Terraform Format
-      run: terraform fmt -check
+      - name: Terraform Plan
+        if: github.ref == 'refs/heads/release/*' && github.event_name == 'push'
+        run: terraform plan -input=false
 
-    - name: Terraform Plan
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: terraform plan -input=false
-
-    - name: Apply Terraform
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: terraform apply -auto-approve
+      - name: Apply Terraform
+        if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
+        run: terraform apply -auto-approve
