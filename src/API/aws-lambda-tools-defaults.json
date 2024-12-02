@@ -1,27 +1,26 @@
-
 {
-    "Information" : [
-        "This file provides default values for the deployment wizard inside Visual Studio and the AWS Lambda commands added to the .NET Core CLI.",
-        "To learn more about the Lambda commands with the .NET Core CLI execute the following command at the command line in the project root directory.",
-        "dotnet lambda help",
-        "All the command line options for the Lambda command can be specified in this file."
-    ],
-    "profile"     : "cloud_guru",
-    "region"      : "us-east-1",
-    "configuration" : "Release",
-    "function-architecture" : "x86_64",
-    "function-runtime"      : "dotnet8",
-    "function-memory-size"  : 512,
-    "function-timeout"      : 30,
-    "function-handler"      : "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler",
-    "framework"             : "net8.0",
-    "function-name"         : "lambda_produto_function",
-    "package-type"          : "Zip",
-    "function-role"         : "arn:aws:iam::211125352090:role/lambda_produto_execution_role",
-    "function-subnets"      : "subnet-0fa3ffb994298eb7f,subnet-01d04639263b8d95b,subnet-0050abc50a280d75c,subnet-077c631cc3858639e,subnet-001b54932f5754663,subnet-0b172464e543278ee",
-    "function-security-groups" : "sg-0850a4ecf5aafa7d3",
-    "tracing-mode"             : "PassThrough",
-    "environment-variables"    : "\"SQLServerConnection\"=\"Server=terraform-20241201214926992200000002.clq648mwwdod.us-east-1.rds.amazonaws.com;Database=ByteMeBurger;User Id=techchallenge;Password=techchallenge;\"",
-    "image-tag"                : "",
-    "function-description"     : ""
+  "Information": [
+    "This file provides default values for the deployment wizard inside Visual Studio and the AWS Lambda commands added to the .NET Core CLI.",
+    "To learn more about the Lambda commands with the .NET Core CLI execute the following command at the command line in the project root directory.",
+    "dotnet lambda help",
+    "All the command line options for the Lambda command can be specified in this file."
+  ],
+  "profile": "cloud_guru",
+  "region": "us-east-1",
+  "configuration": "Release",
+  "function-architecture": "x86_64",
+  "function-runtime": "dotnet8",
+  "function-memory-size": 512,
+  "function-timeout": 30,
+  "function-handler": "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler",
+  "framework": "net8.0",
+  "function-name": "lambda_produto_function",
+  "package-type": "Zip",
+  "function-role": "arn:aws:iam::211125352090:role/lambda_produto_execution_role",
+  "function-subnets": "subnet-0fa3ffb994298eb7f,subnet-01d04639263b8d95b,subnet-0050abc50a280d75c,subnet-077c631cc3858639e,subnet-001b54932f5754663,subnet-0b172464e543278ee",
+  "function-security-groups": "sg-0850a4ecf5aafa7d3",
+  "tracing-mode": "PassThrough",
+  "environment-variables": "\"SQLServerConnection\"=\"Server=terraform-20241202214831620400000002.cfg2aua2qm9u.us-east-1.rds.amazonaws.com;Database=ByteMeBurger;User Id=techchallenge;Password=techchallenge;TrustServerCertificate=True;\"",
+  "image-tag": "",
+  "function-description": ""
 }

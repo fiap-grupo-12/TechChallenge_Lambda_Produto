@@ -85,6 +85,12 @@ namespace FIAP.TechChallenge.LambdaProduto.Infra.Data.Repositories
         {
             try
             {
+                var trackedEntity = _context.Produtos.Local.FirstOrDefault(x => x.Id == produto.Id);
+                if (trackedEntity != null)
+                {
+                    _context.Entry(trackedEntity).State = EntityState.Detached;
+                }
+
                 _context.Produtos.Update(produto);
                 await _context.SaveChangesAsync();
                 return produto;
