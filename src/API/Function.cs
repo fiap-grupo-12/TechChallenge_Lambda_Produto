@@ -65,6 +65,7 @@ public class Function
         }
     }
 
+
     private APIGatewayProxyResponse HandleGet(APIGatewayProxyRequest request, ILambdaContext context)
     {
         var categoria = ExtractPathParameter(request.Path.ToLower(), "produto");
