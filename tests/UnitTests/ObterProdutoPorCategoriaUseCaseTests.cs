@@ -29,13 +29,21 @@ namespace FIAP.TechChallenge.LambdaProduto.UnitTests
         public void Execute_ShouldReturnMappedProdutos_WhenCategoriaExists()
         {
             // Arrange
-            var produtos = new List<Produto> { new Produto { Id = 1, Nome = "Produto 1", Descricao = "Descricao 1", Valor = 50, CategoriaProduto = new Categoria { Id = 1, Nome = "Lanche" } }, new Produto { Id = 2, Nome = "Produto 2", Descricao = "Descricao 2", Valor = 100, CategoriaProduto = new Categoria { Id = 1, Nome = "Categoria Existente" } } };
-            _produtoRepositoryMock.Setup(repo => repo.GetByCategoria(It.IsAny<int>())).Returns(produtos);
-
-            var mappedProdutos = new List<ProdutoResponse> {
-                new ProdutoResponse { Nome = "Produto 1", Descricao = "Descricao 1", Valor = 50, CategoriaProduto = produtos[0].CategoriaProduto },
-                new ProdutoResponse { Nome = "Produto 2", Descricao = "Descricao 2", Valor = 100, CategoriaProduto = produtos[1].CategoriaProduto }
+            var categoria = new Categoria { Id = 1, Nome = "Lanche" };
+            var produtos = new List<Produto>
+            {
+                new Produto { Id = 1, Nome = "Produto 1", Descricao = "Descricao 1", Valor = 50, CategoriaProduto = categoria },
+                new Produto { Id = 2, Nome = "Produto 2", Descricao = "Descricao 2", Valor = 100, CategoriaProduto = categoria }
             };
+
+            var mappedProdutos = new List<ProdutoResponse>
+            {
+                new ProdutoResponse { Nome = "Produto 1", Descricao = "Descricao 1", Valor = 50, CategoriaProduto = categoria },
+                new ProdutoResponse { Nome = "Produto 2", Descricao = "Descricao 2", Valor = 100, CategoriaProduto = categoria }
+            };
+
+            _categoriaRepositoryMock.Setup(repo => repo.GetByName("Lanche")).Returns(categoria);
+            _produtoRepositoryMock.Setup(repo => repo.GetByCategoria(categoria.Id)).Returns(produtos);
             _mapperMock.Setup(mapper => mapper.Map<IList<ProdutoResponse>>(produtos)).Returns(mappedProdutos);
 
             // Act
@@ -44,6 +52,7 @@ namespace FIAP.TechChallenge.LambdaProduto.UnitTests
             // Assert
             Assert.Equal(mappedProdutos, result);
         }
+
 
         [Fact]
         public void Execute_ShouldReturnEmptyList_WhenNoProdutosFound()

@@ -46,7 +46,7 @@ namespace FIAP.TechChallenge.LambdaProduto.Tests
         public async Task Execute_ShouldReturnTrue_WhenProdutoCreatedSuccessfully()
         {
             // Arrange
-            var categoria = new Categoria { Id = 1, Nome = "Categoria Existente" };
+            var categoria = new Categoria { Id = 1, Nome = "Lanche" };
             _categoriaRepositoryMock.Setup(repo => repo.GetByName(It.IsAny<string>())).Returns(categoria);
 
             var request = new CriarProdutoRequest
@@ -54,7 +54,7 @@ namespace FIAP.TechChallenge.LambdaProduto.Tests
                 Nome = "Produto Teste",
                 Descricao = "Descricao Teste",
                 Valor = 100,
-                NomeCategoria = "Categoria Existente"
+                NomeCategoria = "Lanche"
             };
 
             // Act
