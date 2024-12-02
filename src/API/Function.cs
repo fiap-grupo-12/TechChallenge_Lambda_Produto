@@ -2,6 +2,7 @@ using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using FIAP.TechChallenge.LambdaProduto.API.Extensions;
 using FIAP.TechChallenge.LambdaProduto.Application.Models.Request;
+using FIAP.TechChallenge.LambdaProduto.Application.Models.Response;
 using FIAP.TechChallenge.LambdaProduto.Application.UseCases.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
@@ -48,12 +49,12 @@ public class Function
 
         try
         {
-            return (request.HttpMethod.ToUpper(), request.Path) switch
+            return (request.HttpMethod.ToUpper(), request.Path.ToLower()) switch
             {
                 ("GET", var path) when path.StartsWith("/produto/") => HandleGet(request, context),
                 ("POST", "/produto") => HandlePost(request, context),
                 ("PUT", "/produto") => HandlePut(request, context),
-                ("DELETE", var path) when path.StartsWith("/produto/") => HandleDelete(request, context),
+                ("DELETE", var path) when path.StartsWith("/produto") => HandleDelete(request, context),
                 _ => BuildResponse(404, new { Message = "Endpoint " + request.HttpMethod.ToUpper() + " - " + request.Path + " n�o encontrado" })
             };
         }
@@ -66,16 +67,20 @@ public class Function
 
     private APIGatewayProxyResponse HandleGet(APIGatewayProxyRequest request, ILambdaContext context)
     {
-        var categoria = ExtractPathParameter(request.Path, "produto");
-
-        if (int.TryParse(categoria, out int idCategoria))
+        var categoria = ExtractPathParameter(request.Path.ToLower(), "produto");
+        if (string.IsNullOrWhiteSpace(categoria))
         {
-            var result = _obterProdutoPorCategoria.Execute(idCategoria);
+            return BuildResponse(400, new { Message = "Categoria inválida." });
+        }
+        try
+        {
+            IList<ProdutoResponse> result = _obterProdutoPorCategoria.Execute(categoria);
             return BuildResponse(200, result);
         }
-        else
+        catch (Exception ex)
         {
-            return BuildResponse(400, new { Message = "Categoria inv�lida." });
+            context.Logger.LogLine($"Erro ao obter produtos: {ex.Message}");
+            return BuildResponse(500, new { Message = "Erro ao obter produtos." });
         }
 
     }
@@ -100,12 +105,27 @@ public class Function
 
     private APIGatewayProxyResponse HandleDelete(APIGatewayProxyRequest request, ILambdaContext context)
     {
-        var id = ExtractPathParameter(request.Path, "produto");
-        var result = _removerProduto.Execute(int.Parse(id)).Result;
-        return result
-            ? BuildResponse(200, new { Message = "Produto removido com sucesso" })
-            : BuildResponse(404, new { Message = "Produto n�o encontrado." });
+        if (request.QueryStringParameters != null && request.QueryStringParameters.TryGetValue("id", out var idString) && int.TryParse(idString, out var id))
+        {
+            try
+            {
+                var result = _removerProduto.Execute(id).Result;
+                return result
+                    ? BuildResponse(200, new { Message = "Produto removido com sucesso" })
+                    : BuildResponse(404, new { Message = "Produto não encontrado." });
+            }
+            catch (Exception ex)
+            {
+                context.Logger.LogLine($"Erro ao remover produto: {ex.Message}");
+                return BuildResponse(500, new { Message = "Erro ao remover produto." });
+            }
+        }
+        else
+        {
+            return BuildResponse(400, new { Message = "Parâmetro 'id' é necessário e deve ser um número válido." });
+        }
     }
+
 
     private static string ExtractPathParameter(string path, string basePath)
     {

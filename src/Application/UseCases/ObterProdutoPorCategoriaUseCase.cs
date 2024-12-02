@@ -18,10 +18,15 @@ namespace FIAP.TechChallenge.LambdaProduto.Application.UseCases
             _mapper = mapper;
         }
 
-        public IList<ProdutoResponse> Execute(int request)
+        public IList<ProdutoResponse> Execute(string request)
         {
             var result = new List<ProdutoResponse>();
-            var produtos = _produtoRepository.GetByCategoria(request);
+            var categoria = _categoriaRepository.GetByName(request);
+
+            if (categoria is null)
+                return result;
+
+            var produtos = _produtoRepository.GetByCategoria(categoria.Id);
 
             return _mapper.Map<IList<ProdutoResponse>>(produtos);
         }

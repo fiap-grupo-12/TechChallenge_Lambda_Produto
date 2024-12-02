@@ -1,5 +1,5 @@
 # Nome do bucket e região
-$bucketName = "code-lambdas-functions-produto2"
+$bucketName = "terraform-tfstate-grupo12-fiap-2024-produto3"
 $region = "us-east-1"
 
 # Criar o bucket (sem LocationConstraint para us-east-1, pois não é necessário)

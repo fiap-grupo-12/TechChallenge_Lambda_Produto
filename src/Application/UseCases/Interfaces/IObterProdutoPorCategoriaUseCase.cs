@@ -2,7 +2,7 @@
 
 namespace FIAP.TechChallenge.LambdaProduto.Application.UseCases.Interfaces
 {
-    public interface IObterProdutoPorCategoriaUseCase : IUseCase<int, IList<ProdutoResponse>>
+    public interface IObterProdutoPorCategoriaUseCase : IUseCase<string, IList<ProdutoResponse>>
     {
     }
 }
