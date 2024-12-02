@@ -4,7 +4,7 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket = "terraform-tfstate-grupo12-fiap-2024-produto"
+    bucket = "terraform-tfstate-grupo12-fiap-2024-produto-api"
     key    = "lambda_produto/terraform.tfstate"
     region = "us-east-1"
   }
@@ -123,7 +123,7 @@ resource "aws_lambda_function" "produto_function" {
   memory_size   = 512
   timeout       = 30
   handler       = "FIAP.TechChallenge.LambdaProduto.API::FIAP.TechChallenge.LambdaProduto.API.Function::FunctionHandler"
-  s3_bucket     = "code-lambdas-functions-produto"
+  s3_bucket     = "code-lambdas-functions-produto-api"
   s3_key        = "lambda_produto_function.zip"
 
   vpc_config {
