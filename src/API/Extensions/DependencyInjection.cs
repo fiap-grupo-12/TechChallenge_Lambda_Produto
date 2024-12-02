@@ -5,7 +5,6 @@ using FIAP.TechChallenge.LambdaProduto.Domain.Repositories;
 using FIAP.TechChallenge.LambdaProduto.Infra.Data.Repositories;
 using FIAP.TechChallenge.LambdaProduto.Infra.Data.Configurations;
 using FIAP.TechChallenge.LambdaProduto.Application;
-using FIAP.TechChallenge.LambdaProduto.Infra.Data.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -47,7 +46,7 @@ namespace FIAP.TechChallenge.LambdaProduto.API.Extensions
             }
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
-            services.AddScoped<IDatabaseInitializer, DatabaseInitializer>();
+            //services.AddScoped<IDatabaseInitializer, DatabaseInitializer>();
 
             return services;
         }
