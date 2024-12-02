@@ -53,7 +53,7 @@ jobs:
             -Dsonar.organization=fiap-grupo-12
             -Dsonar.cs.opencover.reportsPaths=coverage/**/coverage.opencover.xml
           projectBaseDir: .
-
+  
   Publish:
     needs: SonarCloud
     runs-on: ubuntu-latest
@@ -61,21 +61,34 @@ jobs:
       run:
         working-directory: ./src/API
         shell: bash
-    if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
     steps:
+      - name: Skip or Execute Publish
+        run: |
+          if [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
+            echo "Skipping Publish: Merge on release branch."
+          elif [[ "${{ github.ref }}" == refs/heads/main && "${{ github.event_name }}" == pull_request ]]; then
+            echo "Running Publish steps."
+          fi
+
       - uses: actions/checkout@v4
+        if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
+
       - name: Setup .NET
+        if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
       - name: Install Amazon Lambda Tools
+        if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
         run: dotnet tool install -g Amazon.Lambda.Tools
 
       - name: Publish Lambda Package
+        if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
         run: dotnet lambda package --configuration Release --output-package ./lambda_produto_function.zip
 
       - name: Configure AWS credentials
+        if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -83,6 +96,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Verificando se bucket está criado
+        if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
         run: |
           BUCKET_NAME="code-lambdas-functions-produto"
           REGION="us-east-1"
@@ -95,10 +109,11 @@ jobs:
           fi
 
       - name: Upload to S3
+        if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
         run: |
           BUCKET_NAME="code-lambdas-functions-produto"
           aws s3 cp lambda_produto_function.zip s3://$BUCKET_NAME/
-
+ 
   Infra:
     needs: Publish
     runs-on: ubuntu-latest
